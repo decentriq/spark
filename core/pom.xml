@@ -684,7 +684,7 @@
                   <goal>run</goal>
                 </goals>
                 <configuration>
-                  <protocArtifact>com.google.protobuf:protoc:${protobuf.version}</protocArtifact>
+                  <protocCommand>protoc</protocCommand>
                   <protocVersion>${protobuf.version}</protocVersion>
                   <inputDirectories>
                     <include>src/main/protobuf</include>
@@ -714,9 +714,8 @@
                   <goal>run</goal>
                 </goals>
                 <configuration>
-                  <protocArtifact>com.google.protobuf:protoc:${protobuf.version}</protocArtifact>
+		  <protocCommand>protoc</protocCommand>
                   <protocVersion>${protobuf.version}</protocVersion>
-                  <protocCommand>${spark.protoc.executable.path}</protocCommand>
                   <inputDirectories>
                     <include>src/main/protobuf</include>
                   </inputDirectories>

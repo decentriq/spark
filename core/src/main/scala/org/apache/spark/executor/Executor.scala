@@ -36,7 +36,6 @@ import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 import com.google.common.cache.{Cache, CacheBuilder, RemovalListener, RemovalNotification}
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.MDC
 
 import org.apache.spark._
@@ -118,14 +117,10 @@ private[spark] class Executor(
   // Use UninterruptibleThread to run tasks so that we can allow running codes without being
   // interrupted by `Thread.interrupt()`. Some issues, such as KAFKA-1894, HADOOP-10622,
   // will hang forever if some methods are interrupted.
-  private[executor] val threadPool = {
-    val threadFactory = new ThreadFactoryBuilder()
-      .setDaemon(true)
-      .setNameFormat("Executor task launch worker-%d")
-      .setThreadFactory((r: Runnable) => new UninterruptibleThread(r, "unused"))
-      .build()
-    Executors.newCachedThreadPool(threadFactory).asInstanceOf[ThreadPoolExecutor]
-  }
+  private[executor] val threadPool = ThreadUtils.newDaemonCachedThreadPool(
+    "Executor task launch worker",
+    scala.util.Properties.envOrElse("SPARK_EXECUTOR_POOL_SIZE", "4").toInt
+  )
   private val schemes = conf.get(EXECUTOR_METRICS_FILESYSTEM_SCHEMES)
     .toLowerCase(Locale.ROOT).split(",").map(_.trim).filter(_.nonEmpty)
   private val executorSource = new ExecutorSource(threadPool, executorId, schemes)
